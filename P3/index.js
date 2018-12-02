@@ -1,12 +1,6 @@
 const fs = require('fs');
 let input = "input.txt";
 
-/* 
-    Checksum is determined by multiplying the number of lines that contain...
-    - at least 2 of the same letter (max 1 per line)
-    - at least 3 of the same letter (max 1 per line)
-*/
-
 let twos = 0;
 let threes = 0;
 
