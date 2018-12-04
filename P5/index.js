@@ -24,7 +24,7 @@ fs.readFile(input, 'utf8', function(err, data) {
             fabricHeight = y + height;
     }
 
-    let fabric = Array(fabricWidth+1).fill().map( () => Array(fabricHeight+1).fill(0));
+    let fabric = Array(fabricWidth).fill().map( () => Array(fabricHeight).fill(0));
     result.forEach( el => {
         let x = parseInt(el[3]);
         let y = parseInt(el[4]);
