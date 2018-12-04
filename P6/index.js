@@ -7,7 +7,6 @@ fs.readFile(input, 'utf8', function(err, data) {
 
     let fabricWidth = 0;
     let fabricHeight = 0;
-    let contested = 0;
 
     result = result.map(el =>  el.replace(/[\#\@\:\,x]/g, ' ').trim().split(' '));
 
@@ -24,7 +23,8 @@ fs.readFile(input, 'utf8', function(err, data) {
             fabricHeight = y + height;
     }
 
-    let fabric = Array(fabricWidth+1).fill().map( () => Array(fabricHeight+1).fill(0));
+    let fabric = Array(fabricWidth).fill().map( () => Array(fabricHeight).fill(0));
+    let dict = {};
     result.forEach( el => {
         let id = parseInt(el[0]);
         let x = parseInt(el[3]);
@@ -33,15 +33,23 @@ fs.readFile(input, 'utf8', function(err, data) {
         let height = parseInt(el[7]);
         for (let i = x; i < x + width; i++) {
             for (let j = y; j < y + height; j++) {
-                if (fabric[i][j] === 1) {
-                    fabric[i][j] = 2;
-                    contested++;
-                } else if (fabric[i][j] === 0) {
-                    fabric[i][j] = 1;
+                if (fabric[i][j] === 0) {
+                    fabric[i][j] = id;
+                    if (dict[id] !== 1) {
+                        dict[id] = 0;
+                    }
+                } else {
+                    dict[id] = 1;
+                    dict[fabric[i][j]] = 1;
                 }
             }
         }
     });
-    console.log(contested);
-    return contested;
+
+    for (let key in dict) {
+        if (dict[key] === 0) {
+            console.log(key);
+            return key;
+        } 
+    }
 });
