@@ -13,7 +13,7 @@ fs.readFile(input, 'utf8', function(err, data) {
         }
     }
     console.log(stack.length);
-    return stack;
+    return stack.length;
 });
 
 function isPolarOpposites(unit1, unit2) {
