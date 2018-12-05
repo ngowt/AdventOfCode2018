@@ -22,10 +22,3 @@ function isPolarOpposites(unit1, unit2) {
     return (unit1.toUpperCase() === unit2 && unit2.toLowerCase() === unit1) || 
            (unit1.toLowerCase() === unit2 && unit2.toUpperCase() === unit1);
 }
-
-/*
-a a
-a A
-A a
-A A
-*/
