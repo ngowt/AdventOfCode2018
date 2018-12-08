@@ -15,7 +15,6 @@ let stack = [];
 let trees = [];
 let result;
 let i = 0;
-let metaDataSum = 0;
 
 fs.readFile(input, 'utf8', function(err, data) {
     if (err) throw err;
