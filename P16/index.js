@@ -1,157 +1,85 @@
 const fs = require('fs');
 let input = "input.txt";
 
-let totalDuration = 0;
-let alphabet = "";
-let nodeTimes = {};
-let numberOfElves = 5;
-for (let i = 0; i < 26; i++) {
-    nodeTimes[(alphabet+(i+10).toString(36)).toUpperCase()] = 60+i+1;
-}
-
 class Node {
-    constructor(value) {
-        this.value = value;
+    constructor(numberOfChildren) {
+        this.numberOfChildren = numberOfChildren;
+        this.numberOfMetadata;
         this.children = [];
-        this.prerequisites = [];
-        this.isExecuted = false;
-        this.duration = nodeTimes[value];
+        this.metadataEntries = [];
+        this.metaDataValue;
     }
 }
 
-let dict = {};
-let executionStack = [];
-let options = [];
-let executionQueue = [];
+let stack = [];
+let trees = [];
+let result;
+let i = 0;
+let metaDataSum = 0;
 
 fs.readFile(input, 'utf8', function(err, data) {
     if (err) throw err;
-    let result = data;
-    result = data.replace(/\r\n/g, '\n').split('\n');
-    let allNodes = [];
-    let allChildrenNodes = [];
-    
-    result.map( el => {
-        let node = el[5];
-        let child = el[36];
+    result = data.split(' ');
+    generateNodes();
 
-        if (allNodes.indexOf(node) === -1) {
-            allNodes.push(node);
+    for (let key in trees) {
+        for (let i = 0; i < trees[key].metadataEntries.length; i++) {
+            metaDataSum += parseInt(trees[key].metadataEntries[i]);
         }
-
-        if (allNodes.indexOf(child) === -1) {
-            allNodes.push(child);
-        }
-
-        if (allChildrenNodes.indexOf(child) === -1)
-            allChildrenNodes.push(child);
-
-        if (!dict[node]) {
-            dict[node] = new Node(node);
-        }
-
-        if (!dict[child]) {
-            dict[child] = new Node(child);
-        }
-
-        dict[node].children.push(child);
-        dict[child].prerequisites.push(node);
-    });
-
-    for (let node in dict) {
-        dict[node].children.sort();
-        dict[node].prerequisites.sort();
     }
-
-    options = allNodes.filter(el => !allChildrenNodes.includes(el)).sort();
-    addToQueue(options);
-
-    console.log(executionQueue, options, totalDuration);
-    while (executionQueue.length > 0) {
-        let shortestDuration = getShortestDuration();
-        let shortestNode = getShortestNode();
-        elapseTime(shortestDuration);
-        console.log(executionQueue, options, shortestNode.value, totalDuration);
-    }
-
-    let output = "";
-    for (let key in executionStack) {
-        output = output.concat(executionStack[key]);
-    }
-    console.log(output, totalDuration);
+    console.log(getRootMetaDataValues(stack[0]));
+    return getRootMetaDataValues(stack[0]);
 });
 
-function getShortestDuration() {
-    let shortestDuration;
-    for (let key in executionQueue) {
-        if (!shortestDuration || dict[executionQueue[key]].duration < shortestDuration) {
-            shortestDuration = dict[executionQueue[key]].duration;
+function getRootMetaDataValues(root) {
+    let metaDataValue = 0;
+    for (let i = 0; i < root.metadataEntries.length; i++) {
+        if (root.children[root.metadataEntries[i] - 1])
+        metaDataValue += root.children[root.metadataEntries[i] - 1].metaDataValue;
+    }
+    return metaDataValue;
+}
+
+function getNodeMetaDataValue(node) {
+    let metadataValue = 0;
+    if (node.children.length == 0) {
+        for (let i = 0; i < node.metadataEntries.length; i++) {
+            metadataValue += parseInt(node.metadataEntries[i]);
+        }
+        return metadataValue;
+    } else {
+        for (let i = 0; i < node.metadataEntries.length; i++) {
+            if (node.children[node.metadataEntries[i] - 1]) {
+                metadataValue += node.children[node.metadataEntries[i]-1].metaDataValue != undefined ? parseInt(node.children[node.metadataEntries[i]-1].metaDataValue) : parseInt(getNodeMetaDataValue(node.children[node.metadataEntries[i]-1]));
+            }
+        }
+        return metadataValue;
+    }
+}
+
+function generateNodes(numChildren, numMetadata) {
+    let numberOfChildren = numChildren;
+    let numberOfMetadata = numMetadata;
+        
+    for (i; i < result.length; i++) {
+        if (numberOfChildren === undefined) {
+            numberOfChildren = result[i];
+            stack.push(new Node(numberOfChildren));
+        } else if (numberOfMetadata === undefined) {
+            numberOfMetadata = result[i];
+            stack[stack.length-1].numberOfMetadata = numberOfMetadata;
+        } else if (stack[stack.length-1].children.length != stack[stack.length-1].numberOfChildren) {
+            generateNodes();
+        } else if (stack[stack.length-1].metadataEntries.length != stack[stack.length-1].numberOfMetadata) {
+            stack[stack.length-1].metadataEntries.push((result[i]));
+        } else if (stack.length > 1) {
+            let childNode = stack.pop();
+            childNode.metaDataValue = getNodeMetaDataValue(childNode);
+            trees.push(childNode);
+            stack[stack.length-1].children.push(childNode);
+            if (stack[stack.length-1].metadataEntries.length != stack[stack.length-1].numberOfMetadata) {
+                generateNodes(stack[stack.length-1].numberOfChildren, stack[stack.length-1].numberOfMetadata);
+            }
         }
     }
-    return shortestDuration;
-}
-
-function elapseTime(shortestDuration) {
-    totalDuration += shortestDuration;
-    let splicedKeys = [];
-    for (let key in executionQueue) {
-        dict[executionQueue[key]].duration -= shortestDuration;
-        if (dict[executionQueue[key]].duration === 0) {
-            dict[executionQueue[key]].isExecuted = true;
-            executionStack.push(executionQueue[key]);
-            addOptions(executionQueue[key]);
-            splicedKeys.push(executionQueue[key]);
-        }
-    }
-    for (let el in splicedKeys) {
-        executionQueue.splice(executionQueue.indexOf(splicedKeys[el]), 1);
-    }
-    addToQueue(options.sort());
-    
-}
-
-function addOptions(node) {
-    dict[node].children.map( el => {
-        if (options.indexOf(el) === -1 && !dict[el].isExecuted && executionQueue.indexOf(el) === -1) 
-            options.push(el);
-    });
-}
-
-function getShortestNode() {
-    let shortestNode;
-    let duration;
-    for (let key in executionQueue) {
-        if (!duration || dict[executionQueue[key]].duration < duration) {
-            duration = dict[executionQueue[key]].duration;
-            shortestNode = dict[executionQueue[key]];
-        }
-    }
-    return shortestNode;
-}
-
-function addToQueue(options) {
-    let splicedKeys = [];
-    for (let i = 0; i < options.length; i++) {
-        if (executionQueue.length < numberOfElves) {
-            if (isAbletoExecute(dict[options[i]])) {
-                executionQueue = executionQueue.concat(options[i]);
-                splicedKeys.push(options[i]);
-            } 
-        }
-    }
-    for (let key in splicedKeys) {
-        options.splice(options.indexOf(splicedKeys[key]), 1);
-    }
-    executionQueue.sort();
-}
-
-function isAbletoExecute(node) {
-    if (node.isExecuted)
-        return false;
-
-    for (let i = 0; i < node.prerequisites.length; i++) {
-        if (!dict[node.prerequisites[i]].isExecuted)
-            return false;
-    }
-    return true;
 }
