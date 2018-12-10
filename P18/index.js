@@ -6,7 +6,7 @@ let circle = [];
 let currentPlayer = 1;
 let turn = 0;
 let totalPlayers = 463;
-let lastTurn = (71787 * 100);
+let lastTurn = 71787 * 100;
 let scores = {};
 let highscore = 0;
 
@@ -61,13 +61,7 @@ function removeMarble() {
 }
 
 function insertMarble(turn) {
-    if (circle.length == 0) {
-        let node = new Node(turn);
-        node.next = node;
-        node.previous = node;
-        circle.push(node);
-        currentNode = node;
-    } else {
+    if (circle.length != 0) {
         if (turn % 23 == 0) {
             addScore(turn);
             removeMarble();
@@ -79,8 +73,13 @@ function insertMarble(turn) {
             nextNextNode.previous = node;
             node.next = nextNextNode;
             node.previous = nextNode;
-            circle.push(node);
             currentNode = node;
         }
+    } else {
+        let node = new Node(turn);
+        node.next = node;
+        node.previous = node;
+        circle.push(node);
+        currentNode = node;
     }
 }
