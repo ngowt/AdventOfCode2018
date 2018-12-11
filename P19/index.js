@@ -39,7 +39,7 @@ fs.readFile(input, 'utf8', function(err, data) {
         smallestHeight = !smallestHeight ? getBoundDimensions(stars).boundHeight : getBoundDimensions(stars).boundHeight < smallestHeight ? getBoundDimensions(stars).boundHeight : smallestHeight;
         skipTime();
         i++;
-        console.log(smallestWidth, smallestHeight, i);
+        console.log(i);
     }
 });
 
