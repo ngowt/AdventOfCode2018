@@ -15,6 +15,8 @@ class Star {
 }
 
 let stars = [];
+let smallestWidth;
+let smallestHeight;
 
 fs.readFile(input, 'utf8', function(err, data) {
     if (err) throw err;
@@ -27,6 +29,10 @@ fs.readFile(input, 'utf8', function(err, data) {
         let velocity = match[1].replace('<', '').replace('>', '').split(', ');
         return new Star(position, velocity);
     });
+
+    for (let i = 0; i < stars.length; i++) {
+        console.log(stars[i]);
+    }
 });
 
 function skipTime() {
