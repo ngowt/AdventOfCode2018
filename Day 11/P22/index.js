@@ -27,23 +27,19 @@ fs.readFile(input, 'utf8', function(err, data) {
         }
     }
 
-    console.log(grid);
-
     for (let x = 1; x < grid.length; x++) {
         for (let y = 1; y < grid.length; y++) {
             for (let n = 1; n < grid.length; n++) {
-                grid[x][y].totalPower = getSumOfPowers({x, y}, 11);
+                grid[x][y].totalPower = getSumOfPowers({x, y}, n);
                 if (grid[x][y].totalPower > highestPower || highestPower == undefined) {
                     highestPower = grid[x][y].totalPower;
-                    topLeftCorner = {x: x-1, y: y-1};
-                    optimalN = 11;
+                    topLeftCorner = n % 2 == 1 ? {x: x-1, y: y-1} : {x, y};
+                    optimalN = n;
                     console.log(`Answer: ${topLeftCorner.x},${topLeftCorner.y},${optimalN}, Power: ${highestPower}`);
                 }
             }
         }
     }
-    console.log(`Optimal N-Size: ${optimalN}`);
-    console.log(`Highest Power: ${highestPower}`);
     console.log(`Answer: ${topLeftCorner.x},${topLeftCorner.y},${optimalN}`);
 });
 
